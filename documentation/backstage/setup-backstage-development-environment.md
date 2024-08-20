@@ -63,10 +63,10 @@ NVM - Node Version Manager, nvm allows you to quickly install and use different 
 ## Verify your application
 
 1. Go to the Backstage UI (should open automactically after the <i> yarn dev </i> command)
-![](/nashtech-documentation/assets/Screenshot%202024-08-19%20161150.png)
-![](/nashtech-documentation/assets/Screenshot%202024-08-19%20161258.png)
+![](/how-to-devops/documentation/backstage/assets/Screenshot%202024-08-19%20161150.png)
+![](/how-to-devops/documentation/backstage/Screenshot%202024-08-19%20161258.png)
 2. Import a component using the file by going to [Register an existing component](http://localhost:3000/catalog-import) and import this file- https://github.com/backstage/backstage/blob/master/catalog-info.yaml
-![](/nashtech-documentation/assets/Screenshot%202024-08-19%20162139.png)
+![](/how-to-devops/documentation/backstage/assets/Screenshot%202024-08-19%20162139.png)
 3. Review the example component
-![](/nashtech-documentation/assets/Screenshot%202024-08-19%20162452.png)
-![](/nashtech-documentation/assets/Screenshot%202024-08-19%20162431.png)
+![](/how-to-devops/documentation/backstage/assets/Screenshot%202024-08-19%20162452.png)
+![](/how-to-devops/documentation/backstage/assets/Screenshot%202024-08-19%20162431.png)
