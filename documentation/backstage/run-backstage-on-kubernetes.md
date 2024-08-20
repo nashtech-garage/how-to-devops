@@ -63,4 +63,4 @@ Here, use Azure CLI
 ```
 ## Deploy Backstage on Kubernetes
 1. Create the Backstage resources by preparing the files the apply them to the target cluster. You can find the instructions for it in the docs website as well - [creating-the-backstage-instance](https://backstage.io/docs/deployment/k8s#creating-the-backstage-instance)
-2. Edit [backstage-resources/bs-secret.yaml] () with your github api token. token must have the permissions explained [here](https://backstage.io/docs/integrations/github/locations/#token-scopes).
+2. Edit [backstage-resources/bs-secret.yaml](https://github.com/nashtech-garage/how-to-devops/blob/main/backstage/backstage-resources/bs-secret.yaml) with your github api token. token must have the permissions explained [here](https://backstage.io/docs/integrations/github/locations/#token-scopes).
