@@ -17,7 +17,7 @@ spec:
       serviceAccountName: backstage-service-account
       containers:
         - name: backstage
-          image: backstage:1.0.0
+          image: ntbackstage.azurecr.io/backstage:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -32,6 +32,13 @@ spec:
             value: "5432"
           - name: POSTGRES_HOST
             value: "postgres.backstage.svc.cluster.local"
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: backstage-secrets
+                key: GITHUB_TOKEN
+      imagePullSecrets:
+        - name: acr-secret  # Add the secret created for pulling images from ACR
 # Uncomment if health checks are enabled in your app:
 # https://backstage.io/docs/plugins/observability#health-checks
 #          readinessProbe:

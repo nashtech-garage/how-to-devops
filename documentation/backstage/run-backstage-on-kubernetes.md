@@ -68,3 +68,8 @@ Here, use Azure CLI
 ```bash
     kubectl apply -f backstage-resources -n backstage
 ```
+4. Check your running instance by port forwarding to it
+```bash
+   kubectl port-forward --namespace=backstage svc/backstage 8080:80
+```
+Access the [backstage app](http://127.0.0.1:8080/)
