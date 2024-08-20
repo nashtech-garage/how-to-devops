@@ -70,3 +70,5 @@ NVM - Node Version Manager, nvm allows you to quickly install and use different 
 3. Review the example component
 ![](./assets/Screenshot%202024-08-19%20162452.png)
 ![](./assets/Screenshot%202024-08-19%20162431.png)
+4. Optional - make sure the images has been pushed on container regiestry
+![](./assets/Screenshot%202024-08-20%20073653.png)
