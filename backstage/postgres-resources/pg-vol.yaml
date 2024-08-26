@@ -1,11 +1,11 @@
-# kubernetes/postgres-storage.yaml
+
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: postgres-storage
   namespace: backstage
   labels:
-    type: local
+    type: production
 spec:
   storageClassName: manual
   capacity:
