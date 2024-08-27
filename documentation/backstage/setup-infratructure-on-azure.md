@@ -40,6 +40,7 @@ Backstage in production uses PostgreSQL as a database. To isolate the database f
 First, create a Kubernetes Secret for the PostgreSQL username and password. This will be used by both the PostgreSQL database and Backstage deployments:
 ```bash
 # postgres-resources/pg-secret.yaml
+# kubernetes/pg-secrets.yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -47,10 +48,10 @@ metadata:
   namespace: backstage
 type: Opaque
 data:
+  POSTGRES_HOST: cG9zdGdyZXM=
   POSTGRES_USER: YmFja3N0YWdl
   POSTGRES_PASSWORD: aHVudGVyMg==
-  POSTGRES_PORT: 5432
-  POSTGRES_HOST: postgres.backstage.svc.cluster.local
+  POSTGRES_DB: cHJvZHVjdGlvbl9iYWNrc3RhZ2U=
 ```
 The data in Kubernetes secrets are base64-encoded. The values can be generated on the command line:
 ```bash
@@ -167,14 +168,16 @@ Now that we have PostgreSQL up and ready to store data, we can create the Backst
 ## Creating a Backstage secret
 ```bash
 # backstage-resources/bs-secret.yaml
-    apiVersion: v1
-    kind: Secret
-    metadata:
-        name: backstage-secrets
-        namespace: backstage
-    type: Opaque
-    data:
-        GITHUB_TOKEN: <your github token>
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backstage-secrets
+  namespace: backstage
+type: Opaque
+data:
+  APP_BASEURL: aHR0cDovL2xvY2FsaG9zdDo4MDgw
+  BACKEND_BASEURL: aHR0cDovL2xvY2FsaG9zdDo4MDgw
+  BACKEND_PORT: NzAwNw==
 ```
 ## Creating a ACR secret
 Create dockerconfigjson file
@@ -192,7 +195,7 @@ Create dockerconfigjson file
 ```
 ```bash
 # backstage-resources/acr-secret.yaml
-    # acr-secret.yaml
+
 apiVersion: v1
 kind: Secret
 metadata:
@@ -203,9 +206,43 @@ data:
 type: kubernetes.io/dockerconfigjson
 
 ```
+## Creating a auth secret
+
+```bash
+# backstage-resources/bs-auth-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: auth-secrets
+  namespace: backstage
+type: Opaque
+data:
+  GITHUB_CLIENT_ID: T3YyM2xpUHloQmgwZVRucllOTXM=
+  GITHUB_CLIENT_SECRET: MDYwOWQ4MzY2NzczZDliYTU2NzhlN2RlYWNiYTI0MDZjMDUxYTRhOA==
+  AZURE_CLIENT_ID: NTJmNDU5MDYtNTVjYy00ZTc4LTkzMTctNDczY2Q2ZTE1NDc1
+  AZURE_CLIENT_SECRET: OXFyOFF+bDEyV1pySHBRLU9kaHlkS2pNUzY3U3B1QmNaamZQWGRmZA==
+  AZURE_TENANT_ID: Y2NiYmNkMjMtNzQ3NS00NjVkLTkyM2UtZDZmZGQzNDJmMjA5
+
+```
+## Creating a auth secret
+
+```bash
+# backstage-resources/bs-integration-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: integration-secrets
+  namespace: backstage
+type: Opaque
+data:
+  GITHUB_TOKEN: Z2hwX1o0RUFrT0tDYWplTklqMlZWbDQzWGVwaFRZZVRJbjBWQjVhNw==
+
+```
+
 ## Creating a Backstage deployment
 ```bash
 # backstage-resources/bs-deploy.yaml
+
 # kubernetes/backstage.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -232,9 +269,13 @@ spec:
               containerPort: 7007
           envFrom:
             - secretRef:
+                name: backstage-secrets
+            - secretRef:
                 name: postgres-secrets
             - secretRef:
-                name: backstage-secrets
+                name: integration-secrets
+            - secretRef:
+                name: auth-secrets
       imagePullSecrets:
         - name: acr-secret  # Add the secret created for pulling images from ACR
 # Uncomment if health checks are enabled in your app:
@@ -247,7 +288,6 @@ spec:
 #            httpGet:
 #              port: 7007
 #              path: /healthcheck
-
 ```
 ## Creating a Backstage service
 ```bash
@@ -255,26 +295,26 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backstage
+  name: backstage-service
   namespace: backstage
 spec:
+  type: ClusterIP
   selector:
     app: backstage
   ports:
     - name: http
       port: 80
       targetPort: 7007
-  type: ClusterIP # ClusterIP is used here because the Ingress Controller will handle external access.
+
 
 ```
 ## Set Up the Ingress Resource
-Ensure Ingress Controller is Installed
+### Install NGINX Ingress Controller
 If you haven't installed an Ingress Controller (like NGINX Ingress Controller) on your AKS cluster, you need to do that first.
+Fowllowing [link](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx)
+### Create an Ingress Resource for Backstage
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
-```
-Create an Ingress Resource for Backstage
-```bash
+# backstage-resources/bs-ingress.yml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -283,18 +323,18 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx
   rules:
-  - host: backstage.nashtech-platformengineering.com
+  - host: backstage.nashtech.platformengineering.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: backstage
+            name: backstage-service
             port:
               number: 80
-
 ```
 ## Apply all portgres manifests
 > Apply the manifests in the directory from this repo [backstage-resources](https://github.com/nashtech-garage/how-to-devops/tree/main/backstage/backstage-resources). It will create the backstage-resources.
