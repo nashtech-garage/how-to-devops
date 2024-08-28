@@ -48,5 +48,6 @@ jobs:
             --sync-policy automated \
             --sync-option CreateNamespace=true  \
             --sync-option SkipDryRunOnMissingResource=true \
+            --sync-retry-limit 5 \
             --upsert \
             --grpc-web
