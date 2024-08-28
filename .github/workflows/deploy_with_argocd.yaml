@@ -46,6 +46,7 @@ jobs:
             --dest-namespace ${{ github.event.inputs.clusterName }} \
             --project default \
             --sync-policy automated \
-            --sync-option CreateNamespace=true \
+            --sync-option CreateNamespace=true  \
+            --sync-option SkipDryRunOnMissingResource=true \
             --upsert \
             --grpc-web
