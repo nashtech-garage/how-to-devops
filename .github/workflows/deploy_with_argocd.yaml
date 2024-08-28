@@ -41,7 +41,7 @@ jobs:
       run: |
           argocd app create ${{ github.event.inputs.clusterName }} \
             --repo ${{ github.event.inputs.repoURLforArgo }} \
-            --path crossplane-gke-test \
+            --path crossplane-gke \
             --dest-server https://kubernetes.default.svc \
             --dest-namespace ${{ github.event.inputs.clusterName }} \
             --project default \
