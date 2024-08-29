@@ -39,7 +39,7 @@ jobs:
 
     - name: Deploy Cluster with Argo CD
       run: |
-          argocd app create Infrastructure \
+          argocd app create infrastructure \
             --repo ${{ github.event.inputs.repoURLforArgo }} \
             --path crossplane-gke \
             --dest-server https://kubernetes.default.svc \
