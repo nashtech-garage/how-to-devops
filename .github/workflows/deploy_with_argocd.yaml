@@ -41,7 +41,7 @@ jobs:
       run: |
           argocd app create infrastructure \
             --repo ${{ github.event.inputs.repoURLforArgo }} \
-            --path crossplane-gke/provider-app \
+            --path infrastructure \
             --dest-server https://kubernetes.default.svc \
             --dest-namespace infrastructure \
             --project default \
