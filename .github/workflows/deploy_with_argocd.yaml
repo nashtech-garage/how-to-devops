@@ -39,11 +39,11 @@ jobs:
 
     - name: Deploy Cluster with Argo CD
       run: |
-          argocd app create ${{ github.event.inputs.clusterName }} \
+          argocd app create Infrastructure \
             --repo ${{ github.event.inputs.repoURLforArgo }} \
             --path crossplane-gke \
             --dest-server https://kubernetes.default.svc \
-            --dest-namespace ${{ github.event.inputs.clusterName }} \
+            --dest-namespace infrastructure \
             --project default \
             --sync-policy automated \
             --sync-option CreateNamespace=true  \
