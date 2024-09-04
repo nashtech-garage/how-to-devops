@@ -18,13 +18,6 @@ on:
       dnsPrefix:
         description: 'DNS Prefix'
         required: true
-      agentPoolProfiles:
-        description: 'Agent Pool Profiles'
-        required: true
-      repoURLforArgo: 
-        description: 'The URL of the repository for Argo CD to deploy AKS'
-        required: true
-
 jobs:
   deploy-cluster:
     runs-on: ubuntu-latest
