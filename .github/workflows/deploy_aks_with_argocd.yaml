@@ -1,4 +1,4 @@
-name: Manage GKE Cluster
+name: Manage AKS Cluster
 
 on:
   workflow_dispatch:
@@ -9,14 +9,20 @@ on:
       region:
         description: 'Region'
         required: true
-      machineType:
-        description: 'Machine Type'
+      resourceGroupName:
+        description: 'Resource Group Name'
         required: true
-      nodeCount:
-        description: 'Node Count'
+      kubernetesVersion:
+        description: 'Kubernetes Version'
+        required: true
+      dnsPrefix:
+        description: 'DNS Prefix'
+        required: true
+      agentPoolProfiles:
+        description: 'Agent Pool Profiles'
         required: true
       repoURLforArgo: 
-        description: 'The URL of the repository for Argo CD to deploy GKE'
+        description: 'The URL of the repository for Argo CD to deploy AKS'
         required: true
 
 jobs:
@@ -37,13 +43,13 @@ jobs:
     - name: Register Repository in Argo CD
       run: argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username hoanglecao --password ${{ secrets.MYGITHUB_TOKEN }}
 
-    - name: Deploy Cluster with Argo CD
+    - name: Deploy AKS Cluster with Argo CD
       run: |
-          argocd app create infrastructure \
+          argocd app create azure-infrastructure \
             --repo ${{ github.event.inputs.repoURLforArgo }} \
             --path infrastructure \
             --dest-server https://kubernetes.default.svc \
-            --dest-namespace infrastructure \
+            --dest-namespace azure-infrastructure \
             --project default \
             --sync-policy automated \
             --sync-option CreateNamespace=true  \
