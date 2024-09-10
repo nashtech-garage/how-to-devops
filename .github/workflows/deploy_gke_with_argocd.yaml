@@ -39,7 +39,7 @@ jobs:
 
     - name: Deploy GKE Cluster with Argo CD
       run: |
-          argocd app create gcp-infrastructure \
+          argocd app create gcp-infrastructure-${{ github.event.inputs.clusterName }} \
             --repo ${{ github.event.inputs.repoURLforArgo }} \
             --path infrastructure \
             --dest-server https://kubernetes.default.svc \

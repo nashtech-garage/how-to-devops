@@ -32,7 +32,7 @@ jobs:
 
     - name: Deploy AKS Cluster with Argo CD
       run: |
-          argocd app create aws-infrastructure \
+          argocd app create aws-infrastructure-${{ github.event.inputs.clusterName }} \
             --repo ${{ github.event.inputs.repoURLforArgo }} \
             --path infrastructure \
             --dest-server https://kubernetes.default.svc \
