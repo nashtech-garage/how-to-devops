@@ -15,7 +15,7 @@ You can download the binary directly using curl or wget. Here's the command to d
 1. Install Upbound Universal Crossplane with the Up command-line.
 ```bash
  up uxp install
- UXP 1.16.0-up.1 installed
+ # UXP 1.16.0-up.1 installed
 ```
 2. Verify the UXP pods are running with kubectl get pods -n upbound-system
 ```bash
