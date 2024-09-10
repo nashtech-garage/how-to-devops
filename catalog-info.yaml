@@ -1,16 +1,16 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: gke-github-workflow
-  description: A component representing a provision GKE workflow
+  name: deploy-gke-with-argocd
+  description: GitHub Action to deploy GKE using Argo CD
+  links:
+    - url: https://github.com/nashtech-garage/how-to-devops/actions/workflows/deploy_gke_with_argocd.yaml
+      title: GitHub Actions
   annotations:
     github.com/project-slug: nashtech-garage/how-to-devops
-    github.com/actions: https://github.com/nashtech-garage/how-to-devops/actions
+    github.com/actions: https://github.com/nashtech-garage/how-to-devops/actions/workflows/deploy_gke_with_argocd.yaml
     backstage.io/managed-by-location: url:https://github.com/nashtech-garage/how-to-devops/blob/main/.github/workflows/deploy_gke_with_argocd.yaml
 spec:
   type: service
   owner: user:default/le.caothihoang
   lifecycle: development
-  links:
-    - url: https://github.com/nashtech-garage/how-to-devops/actions
-      title: GitHub Actions
