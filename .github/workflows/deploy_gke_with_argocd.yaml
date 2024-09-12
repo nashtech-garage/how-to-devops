@@ -43,7 +43,7 @@ jobs:
             --repo ${{ github.event.inputs.repoURLforArgo }} \
             --path infrastructure \
             --dest-server https://kubernetes.default.svc \
-            --dest-namespace infrastructure \
+            --dest-namespace gcp-infrastructure-${{ github.event.inputs.clusterName }} \
             --project default \
             --sync-policy automated \
             --sync-option CreateNamespace=true  \
