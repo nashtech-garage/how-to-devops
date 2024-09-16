@@ -30,20 +30,11 @@ jobs:
     - name: Register Repository in Argo CD
       run: argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username hoanglecao --password ${{ secrets.MYGITHUB_TOKEN }}
 
-    - name: Create ArgoCD app for EKS provider
+    - name: Create ArgoCD app for AWS provider
       run: |
           # Check if the ArgoCD app exists
           if argocd app get aws-provider-app > /dev/null 2>&1; then
-            argocd app create vpc-${{ github.event.inputs.clusterName }}-app \
-              --repo ${{ github.event.inputs.repoURLforArgo }} \
-              --path vpc \
-              --dest-server https://kubernetes.default.svc \
-              --dest-namespace aws-provider \
-              --project default \
-              --sync-policy automated \
-              --sync-retry-limit 5 \
-              --upsert \
-              --grpc-web
+            echo "aws-provider-app already exists"
           else
             argocd app create aws-provider-app \
               --repo ${{ github.event.inputs.repoURLforArgo }} \
@@ -57,3 +48,22 @@ jobs:
               --upsert \
               --grpc-web
           fi
+    - name: Wait for aws-provider-app to sync successfully
+        run: |
+          # Wait for the aws-provider-app to reach the synced and healthy state
+          argocd app wait aws-provider-app --health --timeout 300
+          
+    - name: Create ArgoCD app for EKS Cluster
+      run: |
+          # Check if the ArgoCD app exists
+          argocd app create vpc-${{ github.event.inputs.clusterName }}-app \
+              --repo ${{ github.event.inputs.repoURLforArgo }} \
+              --path vpc \
+              --dest-server https://kubernetes.default.svc \
+              --dest-namespace aws-provider \
+              --project default \
+              --sync-policy automated \
+              --sync-retry-limit 5 \
+              --upsert \
+              --grpc-web
+
