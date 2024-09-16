@@ -47,7 +47,7 @@ jobs:
               --repo ${{ github.event.inputs.repoURLforArgo }} \
               --path gcp \
               --dest-server https://kubernetes.default.svc \
-              --dest-namespace gcp-provider
+              --dest-namespace gcp-provider \
               --project default \
               --sync-policy automated \
               --sync-option CreateNamespace=true \
@@ -61,7 +61,7 @@ jobs:
               --repo ${{ github.event.inputs.repoURLforArgo }} \
               --path gke-cluster \
               --dest-server https://kubernetes.default.svc \
-              --dest-namespace gcp-provider
+              --dest-namespace gcp-provider \ 
               --project default \
               --sync-policy automated \
               --sync-retry-limit 5 \
