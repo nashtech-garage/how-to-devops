@@ -39,16 +39,34 @@ jobs:
     - name: Register Repository in Argo CD
       run: argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username hoanglecao --password ${{ secrets.MYGITHUB_TOKEN }}
 
-    - name: Deploy AKS Cluster with Argo CD
+    - name: Create ArgoCD app for Azure provider
       run: |
-          argocd app create azure-infrastructure-${{ github.event.inputs.clusterName }} \
+          # Check if the ArgoCD app exists
+          if argocd app get azure-provider-app > /dev/null 2>&1; then
+            echo "azure-provider-app already exists."
+          else
+            argocd app create azure-provider-app \
+              --repo ${{ github.event.inputs.repoURLforArgo }} \
+              --path azure \
+              --dest-server https://kubernetes.default.svc \
+              --dest-namespace azure-provider \
+              --project default \
+              --sync-policy automated \
+              --sync-option CreateNamespace=true \
+              --sync-retry-limit 5 \
+              --upsert \
+              --grpc-web
+          fi
+
+    - name: Create ArgoCD app for AKS cluster
+      run: |
+          argocd app create ${{ github.event.inputs.clusterName }}-app \
             --repo ${{ github.event.inputs.repoURLforArgo }} \
-            --path infrastructure \
+            --path aks-cluster \
             --dest-server https://kubernetes.default.svc \
-            --dest-namespace azure-infrastructure \
+            --dest-namespace azure-provider \
             --project default \
             --sync-policy automated \
-            --sync-option CreateNamespace=true  \
             --sync-retry-limit 5 \
             --upsert \
             --grpc-web
