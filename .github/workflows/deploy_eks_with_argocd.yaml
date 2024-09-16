@@ -49,10 +49,10 @@ jobs:
               --grpc-web
           fi
     - name: Wait for aws-provider-app to sync successfully
-        run: |
+      run: |
           # Wait for the aws-provider-app to reach the synced and healthy state
           argocd app wait aws-provider-app --health --timeout 300
-          
+
     - name: Create ArgoCD app for EKS Cluster
       run: |
           # Check if the ArgoCD app exists
