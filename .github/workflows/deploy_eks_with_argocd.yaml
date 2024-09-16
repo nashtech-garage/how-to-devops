@@ -32,14 +32,28 @@ jobs:
 
     - name: Create ArgoCD app for EKS provider
       run: |
-          argocd app create aws-provider-app \
-            --repo ${{ github.event.inputs.repoURLforArgo }} \
-            --path aws \
-            --dest-server https://kubernetes.default.svc \
-            --dest-namespace aws-provider \
-            --project default \
-            --sync-policy automated \
-            --sync-option CreateNamespace=true \
-            --sync-retry-limit 5 \
-            --upsert \
-            --grpc-web
+          # Check if the ArgoCD app exists
+          if argocd app get aws-provider-app > /dev/null 2>&1; then
+            argocd app create vpc-${{ github.event.inputs.clusterName }}-app \
+              --repo ${{ github.event.inputs.repoURLforArgo }} \
+              --path vpc \
+              --dest-server https://kubernetes.default.svc \
+              --dest-namespace aws-provider \
+              --project default \
+              --sync-policy automated \
+              --sync-retry-limit 5 \
+              --upsert \
+              --grpc-web
+          else
+            argocd app create aws-provider-app \
+              --repo ${{ github.event.inputs.repoURLforArgo }} \
+              --path aws \
+              --dest-server https://kubernetes.default.svc \
+              --dest-namespace aws-provider \
+              --project default \
+              --sync-policy automated \
+              --sync-option CreateNamespace=true \
+              --sync-retry-limit 5 \
+              --upsert \
+              --grpc-web
+          fi
