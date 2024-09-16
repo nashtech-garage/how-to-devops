@@ -30,16 +30,33 @@ jobs:
     - name: Register Repository in Argo CD
       run: argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username hoanglecao --password ${{ secrets.MYGITHUB_TOKEN }}
 
-    - name: Deploy AKS Cluster with Argo CD
+    - name: Create ArgoCD app for EKS provider
       run: |
-          argocd app create aws-infrastructure-${{ github.event.inputs.clusterName }} \
-            --repo ${{ github.event.inputs.repoURLforArgo }} \
-            --path infrastructure \
-            --dest-server https://kubernetes.default.svc \
-            --dest-namespace aws-infrastructure \
-            --project default \
-            --sync-policy automated \
-            --sync-option CreateNamespace=true  \
-            --sync-retry-limit 5 \
-            --upsert \
-            --grpc-web
+          # Check if the ArgoCD app exists
+          if argocd app get aws-provider-app > /dev/null 2>&1; then
+            echo "aws-provider-app already exists."
+          else
+            argocd app create aws-provider-app \
+              --repo ${{ github.event.inputs.repoURLforArgo }} \
+              --path aws \
+              --dest-server https://kubernetes.default.svc \
+              --dest-namespace aws-provider \
+              --project default \
+              --sync-policy automated \
+              --sync-option CreateNamespace=true \
+              --sync-retry-limit 5 \
+              --upsert \
+              --grpc-web
+          fi
+    - name: Create ArgoCD app for EKS cluster
+      run: |
+          argocd app create ${{ github.event.inputs.clusterName }}-app \
+              --repo ${{ github.event.inputs.repoURLforArgo }} \
+              --path eks-cluster \
+              --dest-server https://kubernetes.default.svc \
+              --dest-namespace aws-provider \
+              --project default \
+              --sync-policy automated \
+              --sync-retry-limit 5 \
+              --upsert \
+              --grpc-web
