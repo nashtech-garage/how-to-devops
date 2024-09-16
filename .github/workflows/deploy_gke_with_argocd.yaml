@@ -57,7 +57,7 @@ jobs:
           fi
     - name: Create ArgoCD app for GKE cluster
       run: |
-          argocd app create ${{ values.clusterName }}-app \
+          argocd app create ${{ github.event.inputs.clusterName }}-app \
               --repo ${{ github.event.inputs.repoURLforArgo }} \
               --path gke-cluster \
               --dest-server https://kubernetes.default.svc \
