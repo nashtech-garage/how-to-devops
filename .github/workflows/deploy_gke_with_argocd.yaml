@@ -37,16 +37,33 @@ jobs:
     - name: Register Repository in Argo CD
       run: argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username hoanglecao --password ${{ secrets.MYGITHUB_TOKEN }}
 
-    - name: Deploy GKE Cluster with Argo CD
+    - name: Create ArgoCD app for GCP provider
       run: |
-          argocd app create gcp-infrastructure-${{ github.event.inputs.clusterName }} \
-            --repo ${{ github.event.inputs.repoURLforArgo }} \
-            --path infrastructure \
-            --dest-server https://kubernetes.default.svc \
-            --dest-namespace gcp-infrastructure-${{ github.event.inputs.clusterName }} \
-            --project default \
-            --sync-policy automated \
-            --sync-option CreateNamespace=true  \
-            --sync-retry-limit 5 \
-            --upsert \
-            --grpc-web
+          # Check if the ArgoCD app exists
+          if argocd app get gcp-provider-app > /dev/null 2>&1; then
+            echo "gcp-provider-app already exists."
+          else
+            argocd app create gcp-provider-app \
+              --repo ${{ github.event.inputs.repoURLforArgo }} \
+              --path gcp \
+              --dest-server https://kubernetes.default.svc \
+              --dest-namespace gcp-provider
+              --project default \
+              --sync-policy automated \
+              --sync-option CreateNamespace=true \
+              --sync-retry-limit 5 \
+              --upsert \
+              --grpc-web
+          fi
+    - name: Create ArgoCD app for GKE cluster
+      run: |
+          argocd app create ${{ values.clusterName }}-app \
+              --repo ${{ github.event.inputs.repoURLforArgo }} \
+              --path gke-cluster \
+              --dest-server https://kubernetes.default.svc \
+              --dest-namespace gcp-provider
+              --project default \
+              --sync-policy automated \
+              --sync-retry-limit 5 \
+              --upsert \
+              --grpc-web
