@@ -1,5 +1,9 @@
 
 # Generate ArgoCD Auth Token
+## Login to ArgoCD
+```bash
+argocd login <ARGOCD_SERVER> --username <ARGOCD_USER> --password <ARGOCD_PASS> --insecure --grpc-web 
+```
 ## Edit the ArgoCD Configuration
 Open the ArgoCD argocd-cm ConfigMap using the following command:
 ```bash

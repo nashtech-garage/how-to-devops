@@ -5,7 +5,7 @@
 You can download the binary directly using curl or wget. Here's the command to download the correct binary
 ```bash
  curl -sL "https://cli.upbound.io" | sh
- mv up /usr/local/bin/
+ sudo mv up /usr/local/bin/
 ```
 2. Verify the version of up with up --version
 ```bash
