@@ -54,7 +54,7 @@ jobs:
     - name: Wait for aws-provider-app to become synced
       run: |
             # Initialize time
-            TIMEOUT=300
+            TIMEOUT=660
             INTERVAL=10
             ELAPSED=0
 
