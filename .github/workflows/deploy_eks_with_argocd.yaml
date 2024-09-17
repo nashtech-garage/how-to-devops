@@ -55,7 +55,7 @@ jobs:
       run: |
             # Initialize time
             TIMEOUT=660
-            INTERVAL=10
+            INTERVAL=60
             ELAPSED=0
 
             # Loop until the app becomes healthy and synced or we hit the timeout
