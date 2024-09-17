@@ -53,7 +53,9 @@ jobs:
           fi
     - name: Wait for aws-provider-app to become synced
       run: |
-            # Initialize elapsed time
+            # Initialize time
+            TIMEOUT=300
+            INTERVAL=10
             ELAPSED=0
 
             # Loop until the app becomes healthy and synced or we hit the timeout
