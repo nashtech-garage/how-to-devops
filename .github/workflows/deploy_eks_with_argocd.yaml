@@ -12,6 +12,9 @@ on:
       repoURLforArgo: 
         description: 'The URL of the repository for Argo CD to deploy GKE'
         required: true
+      host:
+        description: 'github.com or azure.dev.com'
+        required: true
 jobs:
   deploy-cluster:
     runs-on: ubuntu-latest
@@ -29,6 +32,22 @@ jobs:
 
     - name: Login to Argo CD 
       run: argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USER }} --password ${{ secrets.ARGOCD_PASS }} --insecure --grpc-web 
+
+    
+    - name: Register Repository in Argo CD
+      run: |
+          if [[ ${{ github.event.inputs.host }} == "github.com" ]]; then
+            echo "Registering GitHub repository in ArgoCD..."
+            argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username hoanglecao --password ${{ secrets.MYGITHUB_TOKEN }}
+          
+          elif [[ ${{ github.event.inputs.host }} == "dev.azure.com" ]]; then
+            echo "Registering Azure DevOps repository in ArgoCD..."
+            argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username lecao --password ${{ secrets.MYAZURE_TOKEN }}
+          
+          else
+            echo "Unsupported repository host: $REPO_HOST"
+            exit 1
+          fi
 
     - name: Create ArgoCD app for AWS provider
       run: |
