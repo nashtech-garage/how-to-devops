@@ -18,6 +18,9 @@ on:
       repoURLforArgo: 
         description: 'The URL of the repository for Argo CD to deploy GKE'
         required: true
+      host:
+        description: 'github.com or azure.dev.com'
+        required: true
 
 jobs:
   deploy-cluster:
