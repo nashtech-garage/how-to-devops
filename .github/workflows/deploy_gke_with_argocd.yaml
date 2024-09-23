@@ -66,6 +66,7 @@ jobs:
             --sync-retry-limit 5 \
             --upsert \
             --grpc-web
+        fi
 
     - name: Wait for gcp-provider-app to become synced
       run: |
@@ -108,3 +109,4 @@ jobs:
           --sync-retry-limit 5 \
           --upsert \
           --grpc-web
+        
