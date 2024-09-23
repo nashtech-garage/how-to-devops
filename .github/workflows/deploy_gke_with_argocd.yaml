@@ -48,7 +48,8 @@ jobs:
         else
           echo "Unsupported repository host: $REPO_HOST"
           exit 1
-    
+        fi  # This closes the if-elif-else block
+
     - name: Create ArgoCD app for GCP provider
       run: |
         if argocd app get gcp-provider-app > /dev/null 2>&1; then
@@ -93,6 +94,7 @@ jobs:
         if [[ "$HEALTH_STATUS" != "Healthy" || "$SYNC_STATUS" != "Synced" ]]; then
           echo "gcp-provider-app did not become healthy and synced within $TIMEOUT seconds. Exiting..."
           exit 1
+        fi
 
     - name: Create ArgoCD app for GKE cluster
       run: |
