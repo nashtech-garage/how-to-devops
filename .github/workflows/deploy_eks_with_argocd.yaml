@@ -46,13 +46,6 @@ jobs:
         aws-region: ${{ github.event.inputs.region }}
 
             
-    # Update kubeconfig to use the EKS cluster
-    - name: Configure kubectl for EKS
-      run: |
-        if [[ "${{ github.event.inputs.customKyvernoPolicies }}" != "" ]]; then
-          aws eks --region ${{ github.event.inputs.region }} update-kubeconfig --name ${{ github.event.inputs.clusterName }}
-        fi
-
     - name: Install Argo CD CLI
       run: |
         sudo curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
@@ -263,6 +256,13 @@ jobs:
           echo "${{ github.event.inputs.clusterName }} did not become active and ready within $TIMEOUT seconds. Exiting..."
           exit 1
         fi
+     # Update kubeconfig to use the EKS cluster
+    - name: Configure kubectl for EKS
+      run: |
+        if [[ "${{ github.event.inputs.customKyvernoPolicies }}" != "" ]]; then
+          aws eks --region ${{ github.event.inputs.region }} update-kubeconfig --name ${{ github.event.inputs.clusterName }}
+        fi
+        
     - name: Install Kyverno in the Kubernetes cluster
       run: |
           if [[ "${{ github.event.inputs.customKyvernoPolicies }}" != "" ]]; then
