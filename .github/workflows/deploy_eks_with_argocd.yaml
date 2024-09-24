@@ -271,7 +271,7 @@ jobs:
           ELAPSED=0
           STATUS=""
           while [[ $ELAPSED -lt $TIMEOUT ]]; do
-            STATUS=$(aws eks describe-nodegroup --cluster-name ${{ github.event.inputs.clusterName }} --nodegroup-name nodegroup-${{ values.clusterName }} --query "nodegroup.status" --output text)
+            STATUS=$(aws eks describe-nodegroup --cluster-name ${{ github.event.inputs.clusterName }} --nodegroup-name nodegroup-${{ github.event.inputs.clusterName }} --query "nodegroup.status" --output text)
             echo "NodeGroup status: $STATUS"
             if [[ "$STATUS" == "ACTIVE" ]]; then
               echo "NodeGroup is ACTIVE."
