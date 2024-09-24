@@ -250,7 +250,41 @@ jobs:
           echo "EKS Cluster did not become ACTIVE within $TIMEOUT seconds. Exiting..."
           exit 1
         fi
-     # Update kubeconfig to use the EKS cluster
+
+    - name: Create ArgoCD app for EKS NodeGroup
+      run: |
+          argocd app create ${{ github.event.inputs.clusterName }}-node-group-app \
+            --repo ${{ github.event.inputs.repoURLforArgo }} \
+            --path eks-node-group \
+            --dest-server https://kubernetes.default.svc \
+            --dest-namespace aws-provider \
+            --project default \
+            --sync-policy automated \
+            --sync-retry-limit 5 \
+            --upsert \
+            --grpc-web
+
+    - name: Wait for NodeGroup to be Active
+      run: |
+          TIMEOUT=1800
+          INTERVAL=30
+          ELAPSED=0
+          STATUS=""
+          while [[ $ELAPSED -lt $TIMEOUT ]]; do
+            STATUS=$(aws eks describe-nodegroup --cluster-name ${{ github.event.inputs.clusterName }} --nodegroup-name nodegroup-${{ values.clusterName }} --query "nodegroup.status" --output text)
+            echo "NodeGroup status: $STATUS"
+            if [[ "$STATUS" == "ACTIVE" ]]; then
+              echo "NodeGroup is ACTIVE."
+              break
+            fi
+            echo "Waiting for NodeGroup to become ACTIVE..."
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+          if [[ "$STATUS" != "ACTIVE" ]]; then
+            echo "NodeGroup did not become ACTIVE within $TIMEOUT seconds. Exiting..."
+            exit 1
+          fi
     - name: Configure kubectl for EKS
       run: |
         if [[ "${{ github.event.inputs.customKyvernoPolicies }}" != "" ]]; then
@@ -260,7 +294,7 @@ jobs:
     - name: Install Kyverno in the Kubernetes cluster
       run: |
           if [[ "${{ github.event.inputs.customKyvernoPolicies }}" != "" ]]; then
-            kubectl apply -f https://raw.githubusercontent.com/kyverno/kyverno/main/config/install.yaml
+            kubectl apply -f https://github.com/kyverno/kyverno/releases/download/v1.11.1/install.yaml
           fi
     - name: Apply Kyverno policy to the cluster
       run: |
