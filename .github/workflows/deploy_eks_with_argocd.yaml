@@ -186,7 +186,7 @@ jobs:
     - name: Create ArgoCD app for EKS cluster
       run: |
         argocd app create eks-${{ github.event.inputs.clusterName }}-app \
-          --repo ${{ github.event.inputs.repoURLForArgo }} \
+          --repo ${{ github.event.inputs.repoURLforArgo }} \
           --path eks-cluster \
           --dest-server https://kubernetes.default.svc \
           --dest-namespace aws-provider \
@@ -195,6 +195,7 @@ jobs:
           --sync-retry-limit 5 \
           --upsert \
           --grpc-web
+
     - name: Wait for eks-${{ github.event.inputs.clusterName }}-app to become synced
       run: |
         # Initialize time
