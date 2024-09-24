@@ -198,100 +198,99 @@ jobs:
 
     - name: Wait for eks-${{ github.event.inputs.clusterName }}-app to become synced
       run: |
-          # Initialize time
-          TIMEOUT=660
-          INTERVAL=60
-          ELAPSED=0
-          # Loop until the app becomes healthy and synced or we hit the timeout
-          while [[ $ELAPSED -lt $TIMEOUT ]]; do
-            # Get the health status and sync status of the application
-            APP_STATUS=$(argocd app get eks-${{ github.event.inputs.clusterName }}-app --output json)
-            HEALTH_STATUS=$(echo "$APP_STATUS" | jq -r '.status.health.status')
-            SYNC_STATUS=$(echo "$APP_STATUS" | jq -r '.status.sync.status')
-            echo "Application health status: $HEALTH_STATUS"
-            echo "Application sync status: $SYNC_STATUS"
+        # Initialize time
+        TIMEOUT=660
+        INTERVAL=60
+        ELAPSED=0
+        # Loop until the app becomes healthy and synced or we hit the timeout
+        while [[ $ELAPSED -lt $TIMEOUT ]]; do
+          # Get the health status and sync status of the application
+          APP_STATUS=$(argocd app get eks-${{ github.event.inputs.clusterName }}-app --output json)
+          HEALTH_STATUS=$(echo "$APP_STATUS" | jq -r '.status.health.status')
+          SYNC_STATUS=$(echo "$APP_STATUS" | jq -r '.status.sync.status')
 
-            # If the app is both healthy and synced, break out of the loop
-            if [[ "$HEALTH_STATUS" == "Healthy" && "$SYNC_STATUS" == "Synced" ]]; then
-              echo "eks-${{ github.event.inputs.clusterName }}-app is healthy and synced. Proceeding..."
-              break
-            fi
+          echo "Application health status: $HEALTH_STATUS"
+          echo "Application sync status: $SYNC_STATUS"
 
-            # Wait for the interval duration before checking again
-            echo "Waiting for eks-${{ github.event.inputs.clusterName }}-app to become healthy and synced..."
-            sleep $INTERVAL
+          # If the app is both healthy and synced, break out of the loop
+          if [[ "$HEALTH_STATUS" == "Healthy" && "$SYNC_STATUS" == "Synced" ]]; then
+            echo "eks-${{ github.event.inputs.clusterName }}-app is healthy and synced. Proceeding..."
+            break
+          fi
 
-            # Increment the elapsed time
-            ELAPSED=$((ELAPSED + INTERVAL))
-            done
+          # Wait for the interval duration before checking again
+          echo "Waiting for eks-${{ github.event.inputs.clusterName }}-app to become healthy and synced..."
+          sleep $INTERVAL
 
-            # If the app is still not healthy or synced after the timeout, exit with an error
-            if [[ "$HEALTH_STATUS" != "Healthy" || "$SYNC_STATUS" != "Synced" ]]; then
-              echo "eks-${{ github.event.inputs.clusterName }}-app did not become healthy and synced within $TIMEOUT seconds. Exiting..."
-              exit 1
-            fi
+          # Increment the elapsed time
+          ELAPSED=$((ELAPSED + INTERVAL))
+        done
 
-      - name: Check if EKS Cluster ${{ github.event.inputs.clusterName }} is Ready
-        run: |
-            # Initialize time
-            TIMEOUT=3600
-            INTERVAL=60
-            ELAPSED=0
+        # If the app is still not healthy or synced after the timeout, exit with an error
+        if [[ "$HEALTH_STATUS" != "Healthy" || "$SYNC_STATUS" != "Synced" ]]; then
+          echo "eks-${{ github.event.inputs.clusterName }}-app did not become healthy and synced within $TIMEOUT seconds. Exiting..."
+          exit 1
+        fi
 
-            while [[ $ELAPSED -lt $TIMEOUT ]]; do
-                STATUS=$(kubectl get cluster.eks.aws.crossplane.io ${{ github.event.inputs.clusterName }} -o jsonpath='{.status.atProvider.status}')
-                READY=$(kubectl get cluster.eks.aws.crossplane.io ${{ github.event.inputs.clusterName }} -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-                echo "${{ github.event.inputs.clusterName }} status: $STATUS"
-                echo "${{ github.event.inputs.clusterName }} ready: $READY"
+    - name: Check if EKS Cluster ${{ github.event.inputs.clusterName }} is Ready
+      run: |
+        # Initialize time
+        TIMEOUT=3600
+        INTERVAL=60
+        ELAPSED=0
 
-                if [[ "$STATUS" == "ACTIVE" && "$READY" == "True" ]]; then
-                  echo "EKS Cluster is created and ready."
-                  break
-                fi
+        while [[ $ELAPSED -lt $TIMEOUT ]]; do
+          STATUS=$(kubectl get cluster.eks.aws.crossplane.io ${{ github.event.inputs.clusterName }} -o jsonpath='{.status.atProvider.status}')
+          READY=$(kubectl get cluster.eks.aws.crossplane.io ${{ github.event.inputs.clusterName }} -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
 
-                # Wait for the interval duration before checking again
-                echo "Waiting for ${{ github.event.inputs.clusterName }} to become ready..."
-                sleep $INTERVAL
+          echo "${{ github.event.inputs.clusterName }} status: $STATUS"
+          echo "${{ github.event.inputs.clusterName }} ready: $READY"
 
-                # Increment the elapsed time
-                ELAPSED=$((ELAPSED + INTERVAL))
-                done
+          if [[ "$STATUS" == "ACTIVE" && "$READY" == "True" ]]; then
+            echo "EKS Cluster is created and ready."
+            break
+          fi
 
-                if [[ "$STATUS" != "ACTIVE" || "$READY" != "True" ]]; then
-                  echo "${{ github.event.inputs.clusterName }} did not become active and ready within $TIMEOUT seconds. Exiting..."
-                  exit 1
-                fi
-              
-      - name: Install Kyverno in the Kubernetes cluster
-        run: |
-            if [[ "${{ github.event.inputs.customKyvernoPolicies }}" != "" ]]; then
-                kubectl apply -f https://raw.githubusercontent.com/kyverno/kyverno/main/config/install.yaml
-            fi
+          # Wait for the interval duration before checking again
+          echo "Waiting for ${{ github.event.inputs.clusterName }} to become ready..."
+          sleep $INTERVAL
 
-      - name: Apply Kyverno policy to the cluster
-        run: |
-            if [[ "${{ github.event.inputs.customKyvernoPolicies }}" != "" ]]; then
-              echo "Custom Kyverno Policies provided: ${{ github.event.inputs.customKyvernoPolicies }}"
-              # Add logic to use the custom policies, e.g., clone the repository or apply policies
-            else
-              echo "No custom Kyverno Policies provided."
-            fi
+          # Increment the elapsed time
+          ELAPSED=$((ELAPSED + INTERVAL))
+        done
 
-      - name: Clone Kyverno Policy Repository
-        run: |
-            if [[ -n "${{ github.event.inputs.customKyvernoPolicies }}" ]]; then
-              rm -rf kyverno || true  # Clean previous clone
-              git clone https://github.com/nashtech-garage/kyverno.git
-            fi
+        if [[ "$STATUS" != "ACTIVE" || "$READY" != "True" ]]; then
+          echo "${{ github.event.inputs.clusterName }} did not become active and ready within $TIMEOUT seconds. Exiting..."
+          exit 1
+        fi
+    - name: Install Kyverno in the Kubernetes cluster
+      run: |
+          if [[ "${{ github.event.inputs.customKyvernoPolicies }}" != "" ]]; then
+            kubectl apply -f https://raw.githubusercontent.com/kyverno/kyverno/main/config/install.yaml
+          fi
+    - name: Apply Kyverno policy to the cluster
+      run: |
+        if [[ -n "${{ github.event.inputs.customKyvernoPolicies }}" ]]; then
+          echo "Custom Kyverno Policies provided: ${{ github.event.inputs.customKyvernoPolicies }}"
+          # Add logic to use the custom policies, e.g., clone the repository or apply policies
+        else
+          echo "No custom Kyverno Policies provided."
+        fi
 
-      # Apply Kyverno policies from the specific path in the repository
-      - name: Apply Kyverno Policies
-        run: |
-            if [[ -n "${{ github.event.inputs.customKyvernoPolicies }}" ]]; then
-              if [ -d "kyverno/policies/pod-security/" ]; then
-                kubectl apply -f kyverno/policies/pod-security/
-              else
-                echo "Policy directory not found."
-                exit 1
-              fi
-            fi
+    - name: Clone Kyverno Policy Repository
+      run: |
+        if [[ -n "${{ github.event.inputs.customKyvernoPolicies }}" ]]; then
+          rm -rf kyverno || true  # Clean previous clone if it exists
+          git clone https://github.com/nashtech-garage/kyverno.git
+        fi
+
+    - name: Apply Kyverno Policies
+      run: |
+        if [[ -n "${{ github.event.inputs.customKyvernoPolicies }}" ]]; then
+          if [ -d "kyverno/policies/pod-security/" ]; then
+            kubectl apply -f kyverno/policies/pod-security/
+          else
+            echo "Policy directory not found."
+            exit 1
+          fi
+        fi
