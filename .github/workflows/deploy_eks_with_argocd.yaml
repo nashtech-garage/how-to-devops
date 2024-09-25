@@ -74,6 +74,7 @@ jobs:
         kubectl delete crd cleanuppolicies.kyverno.io --ignore-not-found=true
         kubectl delete crd clusteradmissionreports.kyverno.io --ignore-not-found=true
         kubectl delete crd clusterbackgroundscanreports.kyverno.io --ignore-not-found=true
+        kubectl delete crd policyexceptions.kyverno.io --ignore-not-found=true
     
 
     - name: Install Kyverno in the Kubernetes cluster
