@@ -350,6 +350,9 @@ jobs:
           exit 1
         fi
 
+    - name: Configure kubectl for EKS
+      run: |
+      aws eks --region "${{ github.event.inputs.region }}" update-kubeconfig --name "${{ github.event.inputs.clusterName }}"
 
     - name: Install Kyverno in the Kubernetes cluster
       run: |
