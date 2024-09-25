@@ -63,6 +63,15 @@ jobs:
       run: |
           aws eks --region "${{ github.event.inputs.region }}" update-kubeconfig --name "${{ github.event.inputs.clusterName }}"
 
+    - name: Delete existing Kyverno CRDs
+      run: |
+        kubectl delete crd admissionreports.kyverno.io --ignore-not-found=true
+        kubectl delete crd clusterpolicies.kyverno.io --ignore-not-found=true
+        kubectl delete crd policies.kyverno.io --ignore-not-found=true
+        kubectl delete crd updaterequests.kyverno.io --ignore-not-found=true
+        kubectl delete crd backgroundscanreports.kyverno.io --ignore-not-found=true
+        kubectl delete crd clustercleanuppolicies.kyverno.io --ignore-not-found=true
+        kubectl delete crd cleanuppolicies.kyverno.io --ignore-not-found=true
 
     - name: Install Kyverno in the Kubernetes cluster
       run: |
