@@ -38,7 +38,6 @@ jobs:
           echo "No custom Kyverno Policies provided."
         fi
     
-    # Install Helm
     - name: Install Helm
       run: |
         curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
