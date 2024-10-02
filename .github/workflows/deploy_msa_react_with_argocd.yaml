@@ -21,6 +21,9 @@ on:
       repoURLforArgo: 
         description: 'The URL of the repository for Argo CD to deploy the MSA App'
         required: true
+      repo:
+        description: 'Repo name'
+        required: true
 jobs:
   deploy-msa-react:
     runs-on: ubuntu-latest
@@ -42,8 +45,8 @@ jobs:
     - name: Checkout external repository for Dockerfile
       uses: actions/checkout@v3
       with:
-        repository: nashtech-garage/scaffold-msa-react  # External repo with Dockerfile
-        path: scaffold-msa-react  # Where to check out the external repo
+        repository: ${{ github.event.inputs.repoURLforArgo }}  # External repo with Dockerfile
+        path: ${{ github.event.inputs.repo }} # Where to check out the external repo
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -57,16 +60,16 @@ jobs:
     - name: Build and Push Backend Docker Image
       uses: docker/build-push-action@v5
       with:
-        context: ./scaffold-msa-react/src/backend  # Path to Dockerfile in external repo
-        file: ./scaffold-msa-react/src/backend/Dockerfile  # Explicit path to Dockerfile
+        context: ./${{ github.event.inputs.repoURLforArgo }}/src/backend  # Path to Dockerfile in external repo
+        file: ./${{ github.event.inputs.repoURLforArgo }}/src/backend/Dockerfile  # Explicit path to Dockerfile
         push: true  # Push to Docker Hub
         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.inputs.backendImageName }}:latest  # Change your-image-name
     
     - name: Build and Push FrontEnd Docker Image
       uses: docker/build-push-action@v5
       with:
-        context: ./scaffold-msa-react/src/frontend  # Path to Dockerfile in external repo
-        file: ./scaffold-msa-react/src/frontend/Dockerfile  # Explicit path to Dockerfile
+        context: ./${{ github.event.inputs.repoURLforArgo }}/src/frontend  # Path to Dockerfile in external repo
+        file: ./${{ github.event.inputs.repoURLforArgo }}/src/frontend/Dockerfile  # Explicit path to Dockerfile
         push: true  # Push to Docker Hub
         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.inputs.frontendImageName }}:latest  # Change your-image-name
  
