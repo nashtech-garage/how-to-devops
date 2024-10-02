@@ -24,6 +24,9 @@ on:
       repo:
         description: 'Repo name'
         required: true
+      owner:
+        description: 'owner of repo'
+        required: true
 jobs:
   deploy-msa-react:
     runs-on: ubuntu-latest
@@ -45,7 +48,7 @@ jobs:
     - name: Checkout external repository for Dockerfile
       uses: actions/checkout@v3
       with:
-        repository: ${{ github.event.inputs.repoURLforArgo }}  # External repo with Dockerfile
+        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}  # External repo with Dockerfile
         path: ${{ github.event.inputs.repo }} # Where to check out the external repo
 
     - name: Set up Docker Buildx
