@@ -61,12 +61,11 @@ jobs:
         file: ./scaffold-msa-react/src/frontend/Dockerfile  # Explicit path to Dockerfile
         push: true  # Push to Docker Hub
         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.inputs.frontendImageName }}:latest  # Change your-image-name
-
-      
+ 
     - name: Checkout Code
       uses: actions/checkout@v2
 
-   - name: Install Argo CD CLI
+    - name: Install Argo CD CLI
       run: |
         sudo curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
         sudo chmod +x /usr/local/bin/argocd
@@ -74,7 +73,7 @@ jobs:
     - name: Login to Argo CD 
       run: argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USER }} --password ${{ secrets.ARGOCD_PASS }} --insecure --grpc-web 
 
-     - name: Register Repository in Argo CD
+    - name: Register Repository in Argo CD
       run: |
           argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username hoanglecao --password ${{ secrets.MYGITHUB_TOKEN }}
 
