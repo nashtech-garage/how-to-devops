@@ -82,7 +82,7 @@ jobs:
         argocd app create ${{ github.event.inputs.appName }} \
           --repo ${{ github.event.inputs.repoURLforArgo }} \
           --path deployment \
-          --dest-server https://kubernetes.default.svc \ 
+          --dest-server https://kubernetes.default.svc \
           --dest-namespace ${{ github.event.inputs.appName }} \
           --project default \
           --sync-policy automated \
