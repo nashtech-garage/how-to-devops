@@ -28,8 +28,18 @@ jobs:
   deploy-msa-react:
     runs-on: ubuntu-latest
     steps:
+
     - name: Checkout current repository
       uses: actions/checkout@v3
+
+    - name: Install kubectl
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y kubectl
+
+    - name: Install NGINX
+      run: |
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.1/deploy/static/provider/cloud/deploy.yaml
 
     - name: Checkout external repository for Dockerfile
       uses: actions/checkout@v3
