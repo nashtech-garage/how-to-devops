@@ -21,9 +21,6 @@ on:
       repoURLforArgo: 
         description: 'The URL of the repository for Argo CD to deploy the MSA App'
         required: true
-      k8sClusterURL: 
-        description: 'The URL of the K8s cluster in Argo CD for application deployment'
-        required: true
 jobs:
   deploy-msa-react:
     runs-on: ubuntu-latest
