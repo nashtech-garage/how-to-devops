@@ -39,7 +39,7 @@ jobs:
 
     - name: Install NGINX
       run: |
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.1/deploy/static/provider/cloud/deploy.yaml
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.1/deploy/static/provider/cloud/deploy.yaml --validate=false
 
     - name: Checkout external repository for Dockerfile
       uses: actions/checkout@v3
