@@ -44,6 +44,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y nginx
+    - name: Echo owner and repo
+      run: |
+        echo "Owner: ${{ github.event.inputs.owner }}"
+        echo "Repo: ${{ github.event.inputs.repo }}"
+        echo "repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}"
 
     - name: Checkout external repository for Dockerfile
       uses: actions/checkout@v3
