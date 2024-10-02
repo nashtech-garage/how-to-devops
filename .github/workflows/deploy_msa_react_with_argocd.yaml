@@ -44,11 +44,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y nginx
-    - name: Echo owner and repo
-      run: |
-        echo "Owner: ${{ github.event.inputs.owner }}"
-        echo "Repo: ${{ github.event.inputs.repo }}"
-        echo "repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}"
+
 
     - name: Checkout external repository for Dockerfile
       uses: actions/checkout@v3
@@ -70,21 +66,18 @@ jobs:
     - name: Build and Push Backend Docker Image
       uses: docker/build-push-action@v5
       with:
-        context: ./${{ github.event.inputs.repoURLforArgo }}/src/backend  # Path to Dockerfile in external repo
-        file: ./${{ github.event.inputs.repoURLforArgo }}/src/backend/Dockerfile  # Explicit path to Dockerfile
+        context: ./${{ github.event.inputs.repo }}/src/backend  # Path to Dockerfile in external repo
+        file: ./${{ github.event.inputs.repo }}/src/backend/Dockerfile  # Explicit path to Dockerfile
         push: true  # Push to Docker Hub
         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.inputs.backendImageName }}:latest  # Change your-image-name
     
     - name: Build and Push FrontEnd Docker Image
       uses: docker/build-push-action@v5
       with:
-        context: ./${{ github.event.inputs.repoURLforArgo }}/src/frontend  # Path to Dockerfile in external repo
-        file: ./${{ github.event.inputs.repoURLforArgo }}/src/frontend/Dockerfile  # Explicit path to Dockerfile
+        context: ./${{ github.event.inputs.repo }}/src/frontend  # Path to Dockerfile in external repo
+        file: ./${{ github.event.inputs.repo }}/src/frontend/Dockerfile  # Explicit path to Dockerfile
         push: true  # Push to Docker Hub
         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.inputs.frontendImageName }}:latest  # Change your-image-name
- 
-    - name: Checkout Code
-      uses: actions/checkout@v2
 
     - name: Install Argo CD CLI
       run: |
