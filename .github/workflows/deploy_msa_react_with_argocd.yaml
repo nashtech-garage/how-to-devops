@@ -50,6 +50,7 @@ jobs:
       with:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}  # External repo with Dockerfile
         path: ${{ github.event.inputs.repo }} # Where to check out the external repo
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
