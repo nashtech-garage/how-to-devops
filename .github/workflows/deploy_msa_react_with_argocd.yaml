@@ -3,9 +3,6 @@ name: Deploy a MSA React App On Cluster
 on:
   workflow_dispatch:
     inputs:
-      appName: 
-        description: 'Application Name'
-        required: true
       backendName:
         description: 'Backend Name'
         required: true
@@ -127,18 +124,18 @@ jobs:
 
     - name: Deploy MSA React Application
       run: |
-        argocd app create ${{ github.event.inputs.appName }} \
+        argocd app create todo-app \
           --repo ${{ github.event.inputs.repoURLforArgo }} \
           --path deployment \
           --dest-server https://kubernetes.default.svc \
-          --dest-namespace ${{ github.event.inputs.appName }} \
+          --dest-namespace todo-app \
           --project default \
           --sync-policy automated \
           --sync-option CreateNamespace=true \
           --upsert \
           --grpc-web
 
-    - name: Wait for ${{ github.event.inputs.appName }} to become synced
+    - name: Wait for todo-app to become synced
       run: |
         # Initialize time
         TIMEOUT=660
@@ -148,7 +145,7 @@ jobs:
         # Loop until the app becomes healthy and synced or we hit the timeout
         while [[ $ELAPSED -lt $TIMEOUT ]]; do
           # Get the health status and sync status of the application
-          APP_STATUS=$(argocd app get ${{ github.event.inputs.appName }} --output json)
+          APP_STATUS=$(argocd app get todo-app --output json)
           HEALTH_STATUS=$(echo "$APP_STATUS" | jq -r '.status.health.status')
           SYNC_STATUS=$(echo "$APP_STATUS" | jq -r '.status.sync.status')
           echo "Application health status: $HEALTH_STATUS"
@@ -156,12 +153,12 @@ jobs:
 
           # If the app is both healthy and synced, break out of the loop
           if [[ "$HEALTH_STATUS" == "Healthy" && "$SYNC_STATUS" == "Synced" ]]; then
-            echo "${{ github.event.inputs.appName }} is healthy and synced. Proceeding..."
+            echo "todo-app is healthy and synced. Proceeding..."
             break
           fi
 
           # Wait for the interval duration before checking again
-          echo "Waiting for ${{ github.event.inputs.appName }}to become healthy and synced..."
+          echo "Waiting for todo-app to become healthy and synced..."
           sleep $INTERVAL
 
           # Increment the elapsed time
@@ -170,6 +167,6 @@ jobs:
 
           # If the app is still not healthy or synced after the timeout, exit with an error
           if [[ "$HEALTH_STATUS" != "Healthy" || "$SYNC_STATUS" != "Synced" ]]; then
-            echo "${{ github.event.inputs.appName }} did not become healthy and synced within $TIMEOUT seconds. Exiting..."
+            echo "todo-app did not become healthy and synced within $TIMEOUT seconds. Exiting..."
             exit 1
           fi
