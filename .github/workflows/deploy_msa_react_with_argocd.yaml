@@ -65,6 +65,7 @@ jobs:
           echo "Checking out Azure DevOps repository for Dockerfile..."
           # Parse orgProject input as JSON
           orgProject="${{ github.event.inputs.orgProject }}"
+          orgProject=$(echo "$orgProject" | sed "s/\"/'/g")
           organization=$(echo "$orgProject" | jq -r '.organization')
           project=$(echo "$orgProject" | jq -r '.project')
           
