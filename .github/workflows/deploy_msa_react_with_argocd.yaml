@@ -1,4 +1,4 @@
-name: Deploy a MSA React App On Cluster
+name: Deploy a MSA React App
 
 on:
   workflow_dispatch:
@@ -50,43 +50,30 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y nginx
-    
-    - name: Install jq
-      run: sudo apt-get install -y jq
+
 
     - name: Checkout external repository for Dockerfile
-      id: checkout_dockerfile_repo
-      run: |
-        if [[ ${{ github.event.inputs.host }} == "github.com" ]]; then
-          echo "Checking out GitHub repository for Dockerfile..."
-          echo "repo_url=${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}" >> $GITHUB_OUTPUT
-          echo "token=${{ secrets.MYGITHUB_TOKEN }}" >> $GITHUB_OUTPUT
-        elif [[ ${{ github.event.inputs.host }} == "dev.azure.com" ]]; then
-          echo "Checking out Azure DevOps repository for Dockerfile..."
-          # Parse orgProject input as JSON
-          orgProject='${{ github.event.inputs.orgProject }}'
-          organization=$(echo "$orgProject" | jq -r '.organization')
-          project=$(echo "$orgProject" | jq -r '.project')
-          
-          # Check if organization and project are extracted correctly
-          if [ -z "$organization" ] || [ -z "$project" ]; then
-            echo "Failed to parse organization or project from orgProject input: $orgProject"
-            exit 1
-          fi
-          
-          echo "repo_url=$organization/$project/${{ github.event.inputs.repo }}" >> $GITHUB_OUTPUT
-          echo "token=${{ secrets.MYAZURE_TOKEN }}" >> $GITHUB_OUTPUT
-        else
-          echo "Unsupported repository host: ${{ github.event.inputs.host }}"
-          exit 1
-        fi
-
-    - name: Checkout external repository for Dockerfile
+      if: ${{ github.event.inputs.host == 'github.com' }}
       uses: actions/checkout@v3
       with:
-        repository: ${{ steps.checkout_dockerfile_repo.outputs.repo_url }}
-        path: ${{ github.event.inputs.repo }} 
-        token: ${{ steps.checkout_dockerfile_repo.outputs.token }}
+        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}  # External repo with Dockerfile
+        path: ${{ github.event.inputs.repo }} # Where to check out the external repo
+        token: ${{ secrets.MYGITHUB_TOKEN }}
+
+
+    - name: Checkout Azure DevOps repository for Dockerfile
+      if: ${{ github.event.inputs.host == 'dev.azure.com' }}
+      run: |
+        orgProject='${{ github.event.inputs.orgProject }}'
+        organization=$(echo "$orgProject" | jq -r '.organization')
+        project=$(echo "$orgProject" | jq -r '.project')
+        git clone https://$(AZURE_DEVOPS_PAT)@dev.azure.com/${{ secrets.AZURE_ORG }}/$PROJECT_NAME/_git/$REPO_NAME
+        env:
+          AZURE_ORG: $organization
+          PROJECT_NAME: $project  
+          REPO_NAME: ${{ github.event.inputs.repo }}         
+          AZURE_DEVOPS_PAT: ${{ secrets.MYAZURE_TOKEN }}  
+
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -148,7 +135,6 @@ jobs:
           --sync-option CreateNamespace=true \
           --upsert \
           --grpc-web
-
     - name: Wait for ${{ github.event.inputs.appName }} to become synced
       run: |
         # Initialize time
