@@ -50,6 +50,9 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y nginx
+    
+    - name: Install jq
+      run: sudo apt-get install -y jq
 
 
     - name: Checkout external repository for Dockerfile
