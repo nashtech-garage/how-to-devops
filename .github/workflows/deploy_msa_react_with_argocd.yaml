@@ -122,7 +122,7 @@ jobs:
             argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username lecao --password ${{ secrets.MYAZURE_TOKEN }}
           
           else
-            echo "Unsupported repository host: $REPO_HOST"
+            echo "Unsupported repository host: ${{ github.event.inputs.host }}"
             exit 1
           fi
 
