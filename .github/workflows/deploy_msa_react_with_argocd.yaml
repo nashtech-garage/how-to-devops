@@ -121,7 +121,7 @@ jobs:
             echo "Registering Azure DevOps repository in ArgoCD..."
             argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username lecao --password ${{ secrets.MYAZURE_TOKEN }}
              echo "get Azure DevOps repository in ArgoCD..."
-             argocd repo get ${{ github.event.inputs.repoURLforArgo }} --username lecao --password ${{ secrets.MYAZURE_TOKEN }}
+             argocd repo get https://lecao@dev.azure.com/lecao/back-stack/_git/repo-react
           else
             echo "Unsupported repository host: ${{ github.event.inputs.host }}"
             exit 1
