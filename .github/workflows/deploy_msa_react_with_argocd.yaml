@@ -1,4 +1,4 @@
-name: Deploy a MSA React App
+name: Deploy a MSA React App On Cluster
 
 on:
   workflow_dispatch:
@@ -27,6 +27,15 @@ on:
       owner:
         description: 'owner of repo'
         required: true
+      host:
+        description: 'github.com or azure.dev.com'
+        required: true
+      organization:
+        description: 'Azure DevOps organization'
+        required: true
+      project:
+        description: 'Azure DevOps project'
+        required: true
 jobs:
   deploy-msa-react:
     runs-on: ubuntu-latest
@@ -45,14 +54,28 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y nginx
 
+    - name: Checkout external repository for Dockerfile
+      id: checkout_dockerfile_repo
+      run: |
+        if [[ ${{ github.event.inputs.host }} == "github.com" ]]; then
+          echo "Checking out GitHub repository for Dockerfile..."
+          echo "::set-output name=repo_url::${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}"
+          echo "::set-output name=token::${{ secrets.MYGITHUB_TOKEN }}"
+        elif [[ ${{ github.event.inputs.host }} == "dev.azure.com" ]]; then
+          echo "Checking out Azure DevOps repository for Dockerfile..."
+          echo "::set-output name=repo_url::${{ github.event.inputs.organization }}/${{ github.event.inputs.project }}/${{ github.event.inputs.repo }}"
+          echo "::set-output name=token::${{ secrets.MYAZURE_TOKEN }}"
+        else
+          echo "Unsupported repository host: ${{ github.event.inputs.host }} "
+          exit 1
+        fi
 
     - name: Checkout external repository for Dockerfile
       uses: actions/checkout@v3
       with:
-        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}  # External repo with Dockerfile
-        path: ${{ github.event.inputs.repo }} # Where to check out the external repo
-        token: ${{ secrets.MYGITHUB_TOKEN }}
-
+        repository: ${{ steps.checkout_dockerfile_repo.outputs.repo_url }}
+        path: ${{ github.event.inputs.repo }} 
+        token: ${{ steps.checkout_dockerfile_repo.outputs.token }}
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -89,7 +112,18 @@ jobs:
 
     - name: Register Repository in Argo CD
       run: |
-          argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username hoanglecao --password ${{ secrets.MYGITHUB_TOKEN }}
+          if [[ ${{ github.event.inputs.host }} == "github.com" ]]; then
+            echo "Registering GitHub repository in ArgoCD..."
+            argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username hoanglecao --password ${{ secrets.MYGITHUB_TOKEN }}
+          
+          elif [[ ${{ github.event.inputs.host }} == "dev.azure.com" ]]; then
+            echo "Registering Azure DevOps repository in ArgoCD..."
+            argocd repo add ${{ github.event.inputs.repoURLforArgo }} --username lecao --password ${{ secrets.MYAZURE_TOKEN }}
+          
+          else
+            echo "Unsupported repository host: $REPO_HOST"
+            exit 1
+          fi
 
     - name: Deploy MSA React Application
       run: |
@@ -103,3 +137,39 @@ jobs:
           --sync-option CreateNamespace=true \
           --upsert \
           --grpc-web
+
+    - name: Wait for ${{ github.event.inputs.appName }} to become synced
+      run: |
+        # Initialize time
+        TIMEOUT=660
+        INTERVAL=60
+        ELAPSED=0
+
+        # Loop until the app becomes healthy and synced or we hit the timeout
+        while [[ $ELAPSED -lt $TIMEOUT ]]; do
+          # Get the health status and sync status of the application
+          APP_STATUS=$(argocd app get ${{ github.event.inputs.appName }} --output json)
+          HEALTH_STATUS=$(echo "$APP_STATUS" | jq -r '.status.health.status')
+          SYNC_STATUS=$(echo "$APP_STATUS" | jq -r '.status.sync.status')
+          echo "Application health status: $HEALTH_STATUS"
+          echo "Application sync status: $SYNC_STATUS"
+
+          # If the app is both healthy and synced, break out of the loop
+          if [[ "$HEALTH_STATUS" == "Healthy" && "$SYNC_STATUS" == "Synced" ]]; then
+            echo "${{ github.event.inputs.appName }} is healthy and synced. Proceeding..."
+            break
+          fi
+
+          # Wait for the interval duration before checking again
+          echo "Waiting for ${{ github.event.inputs.appName }}to become healthy and synced..."
+          sleep $INTERVAL
+
+          # Increment the elapsed time
+          ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+          # If the app is still not healthy or synced after the timeout, exit with an error
+          if [[ "$HEALTH_STATUS" != "Healthy" || "$SYNC_STATUS" != "Synced" ]]; then
+            echo "${{ github.event.inputs.appName }} did not become healthy and synced within $TIMEOUT seconds. Exiting..."
+            exit 1
+          fi
