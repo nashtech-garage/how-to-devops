@@ -63,9 +63,17 @@ jobs:
           echo "token=${{ secrets.MYGITHUB_TOKEN }}" >> $GITHUB_OUTPUT
         elif [[ ${{ github.event.inputs.host }} == "dev.azure.com" ]]; then
           echo "Checking out Azure DevOps repository for Dockerfile..."
+          # Parse orgProject input as JSON
           orgProject="${{ github.event.inputs.orgProject }}"
           organization=$(echo "$orgProject" | jq -r '.organization')
           project=$(echo "$orgProject" | jq -r '.project')
+          
+          # Check if organization and project are extracted correctly
+          if [ -z "$organization" ] || [ -z "$project" ]; then
+            echo "Failed to parse organization or project from orgProject input: $orgProject"
+            exit 1
+          fi
+          
           echo "repo_url=$organization/$project/${{ github.event.inputs.repo }}" >> $GITHUB_OUTPUT
           echo "token=${{ secrets.MYAZURE_TOKEN }}" >> $GITHUB_OUTPUT
         else
