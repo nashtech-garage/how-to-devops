@@ -59,17 +59,17 @@ jobs:
       run: |
         if [[ ${{ github.event.inputs.host }} == "github.com" ]]; then
           echo "Checking out GitHub repository for Dockerfile..."
-          echo "::set-output name=repo_url::${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}"
-          echo "::set-output name=token::${{ secrets.MYGITHUB_TOKEN }}"
+          echo "repo_url=${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}" >> $GITHUB_OUTPUT
+          echo "token=${{ secrets.MYGITHUB_TOKEN }}" >> $GITHUB_OUTPUT
         elif [[ ${{ github.event.inputs.host }} == "dev.azure.com" ]]; then
           echo "Checking out Azure DevOps repository for Dockerfile..."
           orgProject="${{ github.event.inputs.orgProject }}"
           organization=$(echo "$orgProject" | jq -r '.organization')
           project=$(echo "$orgProject" | jq -r '.project')
-          echo "::set-output name=repo_url::$organization/$project/${{ github.event.inputs.repo }}"
-          echo "::set-output name=token::${{ secrets.MYAZURE_TOKEN }}"
+          echo "repo_url=$organization/$project/${{ github.event.inputs.repo }}" >> $GITHUB_OUTPUT
+          echo "token=${{ secrets.MYAZURE_TOKEN }}" >> $GITHUB_OUTPUT
         else
-          echo "Unsupported repository host: ${{ github.event.inputs.host }} "
+          echo "Unsupported repository host: ${{ github.event.inputs.host }}"
           exit 1
         fi
 
