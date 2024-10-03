@@ -70,13 +70,7 @@ jobs:
         orgProject='${{ github.event.inputs.orgProject }}'
         organization=$(echo "$orgProject" | jq -r '.organization')
         project=$(echo "$orgProject" | jq -r '.project')
-        git clone https://$(AZURE_DEVOPS_PAT)@dev.azure.com/${{ secrets.AZURE_ORG }}/$PROJECT_NAME/_git/$REPO_NAME
-        env:
-          AZURE_ORG: $organization
-          PROJECT_NAME: $project  
-          REPO_NAME: ${{ github.event.inputs.repo }}         
-          AZURE_DEVOPS_PAT: ${{ secrets.MYAZURE_TOKEN }}  
-
+        git clone https://${{ secrets.MYAZURE_TOKEN }}@dev.azure.com/$organization/$project/_git/{{ github.event.inputs.repo }}  
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
