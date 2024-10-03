@@ -54,6 +54,8 @@ jobs:
     - name: Install jq
       run: sudo apt-get install -y jq
 
+    - name: Install git
+      run: sudo apt install git
 
     - name: Checkout external repository for Dockerfile
       if: ${{ github.event.inputs.host == 'github.com' }}
@@ -70,6 +72,8 @@ jobs:
         orgProject='${{ github.event.inputs.orgProject }}'
         organization=$(echo "$orgProject" | jq -r '.organization')
         project=$(echo "$orgProject" | jq -r '.project')
+        echo "organization: $organization"
+        echo "project: $project"
         git clone https://${{ secrets.MYAZURE_TOKEN }}@dev.azure.com/$organization/$project/_git/{{ github.event.inputs.repo }}  
 
     - name: Set up Docker Buildx
