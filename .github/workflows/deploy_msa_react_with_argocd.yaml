@@ -64,8 +64,7 @@ jobs:
         elif [[ ${{ github.event.inputs.host }} == "dev.azure.com" ]]; then
           echo "Checking out Azure DevOps repository for Dockerfile..."
           # Parse orgProject input as JSON
-          orgProject="${{ github.event.inputs.orgProject }}"
-          orgProject=$(echo "$orgProject" | sed "s/\"/'/g")
+          orgProject='${{ github.event.inputs.orgProject }}'
           organization=$(echo "$orgProject" | jq -r '.organization')
           project=$(echo "$orgProject" | jq -r '.project')
           
