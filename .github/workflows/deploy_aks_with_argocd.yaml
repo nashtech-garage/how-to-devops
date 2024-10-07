@@ -205,34 +205,3 @@ jobs:
           echo "aks-${{ github.event.inputs.clusterName }}-app did not become healthy and synced within $TIMEOUT seconds. Exiting..."
           exit 1
         fi
-
-    - name: Log in to Azure
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Wait for AKS Cluster to become ACTIVE
-      run: |
-        TIMEOUT=3600
-        INTERVAL=60
-        ELAPSED=0
-        STATUS=""
-
-        while [[ $ELAPSED -lt $TIMEOUT ]]; do
-          STATUS=$(az aks show --resource-group ${{ github.event.inputs.resourceGroupName }} --name ${{ github.event.inputs.clusterName }} --query "provisioningState" -o tsv)
-          echo "Cluster status: $STATUS"
-
-          if [[ "$STATUS" == "Succeeded" ]]; then
-            echo "AKS Cluster is ACTIVE."
-            break
-          fi
-
-          echo "Waiting for EKS cluster to become ACTIVE..."
-          sleep $INTERVAL
-          ELAPSED=$((ELAPSED + INTERVAL))
-        done
-
-        if [[ "$STATUS" != "Succeeded" ]]; then
-          echo "AKS Cluster did not become ACTIVE within $TIMEOUT seconds. Exiting..."
-          exit 1
-        fi
