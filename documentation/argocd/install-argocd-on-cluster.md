@@ -42,3 +42,22 @@ rm argocd-linux-amd64
 argocd login <Ingress IP> --username <username> --password <password> --insecure
 
 ```
+# Create new user (Optional)
+New users should be defined in argocd-cm ConfigMap
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # add an additional local user with apiKey and login capabilities
+  #   apiKey - allows generating API keys
+  #   login - allows to login using UI
+  accounts.lecao: apiKey, login
+  # disables user. User is enabled by default
+  accounts.lecao.enabled: "true"
+```
