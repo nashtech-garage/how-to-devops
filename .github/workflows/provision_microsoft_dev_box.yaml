@@ -1,0 +1,80 @@
+name: Manage Microsoft Dev Box
+
+on:
+  workflow_dispatch:
+    inputs:
+      devCenterName:
+        description: 'Dev Center Name'
+        required: true
+      projectname:
+        description: 'Project name'
+        required: true
+      devBoxName:
+        description: 'Dev Box Name'
+        required: true
+      region:
+        description: 'Region'
+        required: true
+      resourceGroupName:
+        description: 'Resource Group Name'
+        required: true
+      imageId:
+        description: 'Image ID'
+        required: true  
+      host:
+        description: 'github.com or azure.dev.com'
+        required: true
+      repo:
+        description: 'Repo name'
+        required: true
+      owner:
+        description: 'owner of repo'
+        required: true         
+      orgProject:
+        description: 'Azure DevOps organization, project'
+        required: true
+jobs:
+  deploy-cluster:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Main Repository
+      uses: actions/checkout@v3
+    
+    - name: Checkout dev box github repository 
+      if: ${{ github.event.inputs.host == 'github.com' }}
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}  
+        path: ${{ github.event.inputs.repo }} 
+        token: ${{ secrets.MYGITHUB_TOKEN }}
+
+    - name: Checkout dev box Azure DevOps repository 
+      if: ${{ github.event.inputs.host == 'dev.azure.com' }}
+      run: |
+        orgProject='${{ github.event.inputs.orgProject }}'
+        organization=$(echo "$orgProject" | jq -r '.organization')
+        project=$(echo "$orgProject" | jq -r '.project')
+        repo_name="${{ github.event.inputs.repo }}"
+        git clone https://${{ secrets.MYAZURE_TOKEN }}@dev.azure.com/$organization/$project/_git/$repo_name
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy Bicep to Provision Microsoft Dev Box
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ github.event.inputs.resourceGroupName }}
+          template: './${{ github.event.inputs.repo }}/devbox.bicep' # Reference the Bicep file from the external repo
+          parameters: |
+            devCenterName=${{ github.event.inputs.devCenterName }}
+            projectname=${{ github.event.inputs.projectname }}
+            devBoxName=${{ github.event.inputs.devBoxName }}
+            imageId=${{ github.event.inputs.imageId }}
+            region=${{ github.event.inputs.region }}
+          deploymentMode: Incremental
+
+    - name: Output Dev Box Details
+      run: echo "Dev Box provisioned in region ${{ github.event.inputs.region }}"

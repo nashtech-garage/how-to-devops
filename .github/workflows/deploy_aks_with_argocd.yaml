@@ -19,7 +19,7 @@ on:
         description: 'DNS Prefix'
         required: true
       repoURLforArgo: 
-        description: 'The URL of the repository for Argo CD to deploy GKE'
+        description: 'The URL of the repository for Argo CD to deploy AKS'
         required: true
       host:
         description: 'github.com or azure.dev.com'
