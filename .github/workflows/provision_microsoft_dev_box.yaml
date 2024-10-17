@@ -63,18 +63,18 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Deploy Bicep to Provision Microsoft Dev Box
-        uses: azure/arm-deploy@v1
-        with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ github.event.inputs.resourceGroupName }}
-          template: './${{ github.event.inputs.repo }}/devbox.bicep' # Reference the Bicep file from the external repo
-          parameters: |
-            devCenterName=${{ github.event.inputs.devCenterName }}
-            projectname=${{ github.event.inputs.projectname }}
-            devBoxName=${{ github.event.inputs.devBoxName }}
-            imageId=${{ github.event.inputs.imageId }}
-            region=${{ github.event.inputs.region }}
-          deploymentMode: Incremental
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        resourceGroupName: ${{ github.event.inputs.resourceGroupName }}
+        template: './${{ github.event.inputs.repo }}/devbox.bicep' # Reference the Bicep file from the external repo
+        parameters: |
+          devCenterName=${{ github.event.inputs.devCenterName }}
+          projectname=${{ github.event.inputs.projectname }}
+          devBoxName=${{ github.event.inputs.devBoxName }}
+          imageId=${{ github.event.inputs.imageId }}
+          region=${{ github.event.inputs.region }}
+        deploymentMode: Incremental
 
     - name: Output Dev Box Details
       run: echo "Dev Box provisioned in region ${{ github.event.inputs.region }}"
