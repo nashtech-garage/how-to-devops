@@ -27,7 +27,7 @@ Config GRAFANA_URL and GRAFANA_TOKEN in env
 export GRAFANA_TOKEN=<your grafana token>
 export GRAFANA_URL=<your grafana host>
 ```
-# Display dashboards on a component page
+# Display dashboards and alert on a component page
 Adding the EntityGrafanaDashboardsCard component to an entity's page will display a list of dashboards related to that entity.
 
 ```tsx
@@ -36,13 +36,40 @@ Adding the EntityGrafanaDashboardsCard component to an entity's page will displa
 import { EntityGrafanaDashboardsCard } from '@backstage-community/plugin-grafana';
 
 // ...
-
-const overviewContent = (
+const monitoringPage = (
+  <EntityLayout>
+    <EntityLayout.Route path="/" title="Overview">
+    <Grid container spacing={3} alignItems="stretch">
+    {entityWarningContent}
     <Grid item md={6}>
-      {/* Grafana dashboard card start */}
-      <EntityGrafanaDashboardsCard />
-      {/* Grafana alert card end */}
-    </Grid>
+      <EntityAboutCard variant="gridItem" />
+    </Grid>  
+  </Grid>
+    </EntityLayout.Route>
+    <EntityLayout.Route path="/grafana-dashboard" title="Grafana Dashboard">
+      <Grid item md={6}>
+        <EntityGrafanaDashboardsCard />
+      </Grid> 
+      </EntityLayout.Route>
+
+      <EntityLayout.Route path="/grafana-alert" title="Grafana Alert">
+      <Grid item md={6}>      
+        <EntityGrafanaAlertsCard />
+      </Grid> 
+
+      </EntityLayout.Route>
+  
+  </EntityLayout>
+);
+
+const componentPage = (
+  <EntitySwitch>
+
+    <EntitySwitch.Case if={isComponentType('monitoring')}>
+      {monitoringPage}
+    </EntitySwitch.Case>
+
+  </EntitySwitch>
 );
 ```
 Grafana dashboards are correlated to Backstage entities using a selector defined by an annotation added in the entity's catalog-info.yaml file. The EntityGrafanaDashboardsCard component will then display dashboards matching the given selector.
@@ -75,26 +102,7 @@ Supported unary operators:
 
 Note that the tags @> "my-service" selector can be simplified as:
 
-# Display alerts on a component page
-Adding the EntityGrafanaAlertsCard component to an entity's page will display a list of alerts related to that entity.
 
-```tsx
-// packages/app/src/components/catalog/EntityPage.tsx
-
-import { EntityGrafanaAlertsCard } from '@backstage-community/plugin-grafana';
-
-// ...
-
-const overviewContent = (
-  <Grid container spacing={3} alignItems="stretch">
-    <Grid item md={6}>
-      {/* Grafana alert card start */}
-      <EntityGrafanaAlertsCard />
-      {/* Grafana alert card end */}
-    </Grid>
-  </Grid>
-); 
-```
 Grafana alerts are correlated to Backstage entities using an annotation added in the entity's catalog-info.yaml file.
 ## With Grafana Unified Alerting enabled
 Open the ArgoCD argocd-cm ConfigMap using the following command:
@@ -119,25 +127,25 @@ kubectl rollout restart deployment argocd-server -n argocd
 ```
 # Create grafana component
 ```yaml
-# grafana-component.yaml
+# monitoring-component.yaml
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   annotations:
     grafana/alert-label-selector: "rule=cpu,rule=disk-space"
     grafana/dashboard-selector: "(tags @> 'grafanacloud' || tags @> 'cardinality-management')"
-  name: grafana
-  description: Associate alerts and dashboards to components
+  name: monitoring
+  description: Easily view your New Relic Dashboards, Grafana Dashboards in Backstage, via real-time snapshots of your dashboards
 spec:
   type: monitoring
   owner: user:default/le.caothihoang
   lifecycle: development
   system: nashtech-idp
 ```
-Add grafana-component.yaml into app-config.yaml
+Add monitoring-component.yaml into app-config.yaml
 ```yaml
     - type: file
-      target: ../../packages/backend/component/grafana-component.yaml
+      target: ../../packages/backend/component/monitoring-component.yaml
       rules:
         - allow: [Component]
 ```
