@@ -66,7 +66,7 @@ jobs:
       run: |
         echo "template './${{ github.event.inputs.repo }}/devbox.bicep'"
         echo "devCenterName ${{ github.event.inputs.devCenterName }}"
-        echo "region ${{ github.event.inputs.region }}"
+        
 
     - name: Deploy Bicep to Provision Microsoft Dev Box
       uses: azure/arm-deploy@v1
