@@ -79,7 +79,6 @@ jobs:
           projectName=${{ github.event.inputs.projectName }}
           devBoxName=${{ github.event.inputs.devBoxName }}
           imageId=${{ github.event.inputs.imageId }}
-          region=centralus
         deploymentMode: Incremental
 
     - name: Output Dev Box Details
