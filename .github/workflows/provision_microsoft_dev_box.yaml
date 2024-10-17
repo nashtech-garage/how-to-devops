@@ -68,6 +68,12 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: ${{ github.event.inputs.resourceGroupName }}
         template: './${{ github.event.inputs.repo }}/devbox.bicep' # Reference the Bicep file from the external repo
+        parameters: |
+          devCenterName=${{ github.event.inputs.devCenterName }}
+          projectName=${{ github.event.inputs.projectName }}
+          devBoxName=${{ github.event.inputs.devBoxName }}
+          imageId=${{ github.event.inputs.imageId }}
+          region=${{ github.event.inputs.region }}
         deploymentMode: Incremental
 
     - name: Output Dev Box Details
