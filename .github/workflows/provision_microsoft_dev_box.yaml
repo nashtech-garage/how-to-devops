@@ -62,11 +62,17 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Output information
+    - name: Create parameters.json file
       run: |
-        echo "template './${{ github.event.inputs.repo }}/devbox.bicep'"
-        echo "devCenterName ${{ github.event.inputs.devCenterName }}"
-        
+        echo '{
+          "devCenterName": {
+            "value": "'${{ github.event.inputs.devCenterName }}'"
+          },
+          "region": {
+            "value": "'${{ github.event.inputs.region }}'"
+          }
+        }' > parameters.json
+
 
     - name: Deploy Bicep to Provision Microsoft Dev Box
       uses: azure/arm-deploy@v1
@@ -74,9 +80,7 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: ${{ github.event.inputs.resourceGroupName }}
         template: './${{ github.event.inputs.repo }}/devbox.bicep' # Reference the Bicep file from the external repo
-        parameters: |
-          devCenterName=${{ github.event.inputs.devCenterName }}
-          region=centralus   
+        parameters: '@parameters.json'
         deploymentMode: Incremental
 
     - name: Output Dev Box Details
