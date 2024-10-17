@@ -76,7 +76,7 @@ jobs:
         template: './${{ github.event.inputs.repo }}/devbox.bicep' # Reference the Bicep file from the external repo
         parameters: |
           devCenterName=${{ github.event.inputs.devCenterName }}
-          region='centralus'   
+          region=centralus   
         deploymentMode: Incremental
 
     - name: Output Dev Box Details
