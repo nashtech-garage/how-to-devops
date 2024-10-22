@@ -19,7 +19,7 @@ on:
         description: 'Resource Group Name'
         required: true
       imageId:
-        description: 'Image ID'
+        description: 'Image Id'
         required: true  
       repo:
         description: 'Repo name'
@@ -65,7 +65,7 @@ jobs:
 
           
           "imageId": {
-            "value": "'${{ github.event.inputs.imageId }}'"
+            "value": "'/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ github.event.inputs.resourceGroupName }}/providers/Microsoft.DevCenter/devcenters/${{ github.event.inputs.devCenterName }}/galleries/default/images/${{ github.event.inputs.imageId }}'"
           },
 
         }' > parameters.json
