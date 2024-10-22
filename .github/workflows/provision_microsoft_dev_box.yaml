@@ -21,18 +21,12 @@ on:
       imageId:
         description: 'Image ID'
         required: true  
-      host:
-        description: 'github.com or azure.dev.com'
-        required: true
       repo:
         description: 'Repo name'
         required: true
       owner:
         description: 'owner of repo'
         required: true         
-      orgProject:
-        description: 'Azure DevOps organization, project'
-        required: true
 jobs:
   deploy-cluster:
     runs-on: ubuntu-latest
@@ -46,7 +40,7 @@ jobs:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}  
         path: ${{ github.event.inputs.repo }} 
         token: ${{ secrets.MYGITHUB_TOKEN }}
-        
+
     - name: Login to Azure
       uses: azure/login@v1
       with:
