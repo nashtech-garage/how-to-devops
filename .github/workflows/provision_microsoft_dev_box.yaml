@@ -41,22 +41,12 @@ jobs:
       uses: actions/checkout@v3
     
     - name: Checkout dev box github repository 
-      if: ${{ github.event.inputs.host == 'github.com' }}
       uses: actions/checkout@v3
       with:
         repository: ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}  
         path: ${{ github.event.inputs.repo }} 
         token: ${{ secrets.MYGITHUB_TOKEN }}
-
-    - name: Checkout dev box Azure DevOps repository 
-      if: ${{ github.event.inputs.host == 'dev.azure.com' }}
-      run: |
-        orgProject='${{ github.event.inputs.orgProject }}'
-        organization=$(echo "$orgProject" | jq -r '.organization')
-        project=$(echo "$orgProject" | jq -r '.project')
-        repo_name="${{ github.event.inputs.repo }}"
-        git clone https://${{ secrets.MYAZURE_TOKEN }}@dev.azure.com/$organization/$project/_git/$repo_name
-
+        
     - name: Login to Azure
       uses: azure/login@v1
       with:
@@ -70,7 +60,20 @@ jobs:
           },
           "region": {
             "value": "'${{ github.event.inputs.region }}'"
-          }
+          },
+          "projectName": {
+            "value": "'${{ github.event.inputs.projectName }}'"
+          },
+
+          "devBoxName": {
+            "value": "'${{ github.event.inputs.devBoxName }}'"
+          },
+
+          
+          "imageId": {
+            "value": "'${{ github.event.inputs.imageId }}'"
+          },
+
         }' > parameters.json
 
 
@@ -84,4 +87,4 @@ jobs:
         deploymentMode: Incremental
 
     - name: Output Dev Box Details
-      run: echo "Dev Box provisioned in region ${{ github.event.inputs.region }}"
+      run: echo "Dev Box ${{ github.event.inputs.devBoxName }} provisioned in region ${{ github.event.inputs.region }}"
