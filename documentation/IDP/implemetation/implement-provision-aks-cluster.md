@@ -181,7 +181,7 @@ on:
         description: 'github.com or azure.dev.com'
         required: true
 jobs:
-  provision-microsoft-dev-box:
+  deploy-cluster:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code

@@ -28,7 +28,7 @@ on:
         description: 'owner of repo'
         required: true         
 jobs:
-  deploy-cluster:
+  provision-microsoft-dev-box:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Main Repository
