@@ -31,6 +31,15 @@ jobs:
   provision-microsoft-dev-box:
     runs-on: ubuntu-latest
     steps:
+    - name: Install Azure CLI
+      run: |
+        sudo apt-get update
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+    - name: Install DevCenter CLI extension
+      run: |
+        az extension add --name devcenter
+
     - name: Checkout Main Repository
       uses: actions/checkout@v3
     
@@ -71,7 +80,7 @@ jobs:
         }' > parameters.json
 
 
-    - name: Deploy Bicep to Provision Microsoft Dev Box
+    - name:  Provision Microsoft Dev Box
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -79,6 +88,18 @@ jobs:
         template: './${{ github.event.inputs.repo }}/devbox.bicep' # Reference the Bicep file from the external repo
         parameters: '@parameters.json'
         deploymentMode: Incremental
+
+    - name: Create Dev Box Pool
+      run: |
+        az devcenter admin pool create \
+          --location ${{ github.event.inputs.region }} \
+          --devbox-definition-name ${{ github.event.inputs.devCenterName }}-devboxdef \
+          --pool-name ${{ github.event.inputs.devBoxName }} \
+          --project-name ${{ github.event.inputs.projectName }} \
+          --resource-group ${{ github.event.inputs.resourceGroupName }} \
+          --local-administrator "Enabled" \
+          --virtual-network-type "Managed" \
+          --single-sign-on-status "Enabled"
 
     - name: Output Dev Box Details
       run: echo "Dev Box ${{ github.event.inputs.devBoxName }} provisioned in region ${{ github.event.inputs.region }}"
