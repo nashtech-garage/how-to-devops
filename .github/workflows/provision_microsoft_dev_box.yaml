@@ -93,7 +93,8 @@ jobs:
           --resource-group ${{ github.event.inputs.resourceGroupName }} \
           --local-administrator "Enabled" \
           --virtual-network-type "Managed" \
-          --single-sign-on-status "Enabled"
+          --single-sign-on-status "Enabled" \
+          --managed-virtual-network-regions ${{ github.event.inputs.region }}
 
     - name: Output Dev Box Details
       run: echo "Dev Box ${{ github.event.inputs.devBoxName }} provisioned in region ${{ github.event.inputs.region }}"
