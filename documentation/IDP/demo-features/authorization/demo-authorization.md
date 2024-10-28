@@ -1,3 +1,8 @@
+# List of Groups
+![](../../assets/Screenshot%202024-10-28%20164722.png)
+
+![](../../assets/Screenshot%202024-10-28%20164947.png)
+
 #  Login into Backstage using GitHub account
 This user has permssions
 - catalog-admin
